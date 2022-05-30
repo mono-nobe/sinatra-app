@@ -21,13 +21,20 @@ $ cd sinatra-app
 1. Gemをインストールします。Bundlerのバージョンは2.2.32です。
 
 ```sh
-$ bundle install
+# sinatraのインストール
+$ gem install sinatra
+
+# sinatra-contribのインストール
+$ gem install sinatra-contrib
+
+# webrickのインストール
+$ gem install webrick
 ```
 
 1. アプリを起動します。
 
 ```sh
-$ bundle exec ruby app.rb
+$ ruby app.rb
 ```
 
 1. ブラウザで以下のURLへアクセスします。

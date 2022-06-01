@@ -16,7 +16,7 @@ get '/todos' do
   erb :todos
 end
 
-get '/create' do
+get '/todos/create' do
   erb :create
 end
 

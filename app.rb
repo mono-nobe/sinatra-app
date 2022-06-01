@@ -55,7 +55,11 @@ end
 get '/edit/:id' do
   json = db_json
 
-  @todo = json['todos'].find { |todo| todo['id'] == params['id'].to_i }
+  selected_todo = json['todos'].find { |todo| todo['id'] == params['id'].to_i }
+  selected_todo['title'] = escape_html(selected_todo['title'])
+  selected_todo['body'] = escape_html(selected_todo['body'])
+
+  @todo = selected_todo
   erb :edit
 end
 

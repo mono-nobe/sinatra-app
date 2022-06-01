@@ -10,12 +10,12 @@
 
       <form method="post" action="/edit" >
         <input type="hidden" name="_method" value="PATCH">
-        <input type="hidden" name="id" value="<%= @params["id"] %>">
+        <input type="hidden" name="id" value="<%= @todo["id"] %>">
         <div>
-          <input type="text" name="title" value=<%= @params["title"] %> required>
+          <input type="text" name="title" value=<%= @todo["title"] %> required>
         </div>
         <div>
-          <textarea name="body" rows="10" cols="60" required><%= @params["body"] %></textarea>
+          <textarea name="body" rows="10" cols="60" required><%= @todo["body"] %></textarea>
         </div>
         <input type="submit" value="変更">
       </form>

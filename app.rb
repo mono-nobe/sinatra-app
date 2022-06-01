@@ -12,7 +12,7 @@ get '/todos' do
     todo['body'] = escape_html(todo['body'])
   end
 
-  @params = json['todos']
+  @todos = json['todos']
   erb :todos
 end
 
@@ -44,28 +44,28 @@ end
 get '/detail/:id' do
   json = db_json
 
-  detail = {}
+  selected_todo = {}
   json['todos'].map do |todo|
     next unless todo['id'] == params['id'].to_i
 
     todo['title'] = escape_html(todo['title'])
     todo['body'] = escape_html(todo['body'])
-    detail = todo
+    selected_todo = todo
   end
 
-  @params = detail
+  @todo = selected_todo
   erb :detail
 end
 
 get '/edit/:id' do
   json = db_json
 
-  detail = {}
+  selected_todo = {}
   json['todos'].map do |todo|
-    detail = todo if todo['id'] == params['id'].to_i
+    selected_todo = todo if todo['id'] == params['id'].to_i
   end
 
-  @params = detail
+  @todo = selected_todo
   erb :edit
 end
 

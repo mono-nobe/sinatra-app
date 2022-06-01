@@ -15,9 +15,9 @@
 
     <div>
       <ul>
-        <% @params.each do |param| %>
+        <% @todos.each do |todo| %>
         <li>
-          <a href="/detail/<%= param["id"] %>"><%= param["title"] %></a>
+          <a href="/detail/<%= todo["id"] %>"><%= todo["title"] %></a>
         </li>
         <% end %>
       </ul>

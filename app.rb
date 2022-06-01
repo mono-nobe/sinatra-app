@@ -44,14 +44,9 @@ end
 get '/detail/:id' do
   json = db_json
 
-  selected_todo = {}
-  json['todos'].map do |todo|
-    next unless todo['id'] == params['id'].to_i
-
-    todo['title'] = escape_html(todo['title'])
-    todo['body'] = escape_html(todo['body'])
-    selected_todo = todo
-  end
+  selected_todo = json['todos'].find { |todo| todo['id'] == params['id'].to_i }
+  selected_todo['title'] = escape_html(selected_todo['title'])
+  selected_todo['body'] = escape_html(selected_todo['body'])
 
   @todo = selected_todo
   erb :detail
@@ -60,24 +55,16 @@ end
 get '/edit/:id' do
   json = db_json
 
-  selected_todo = {}
-  json['todos'].map do |todo|
-    selected_todo = todo if todo['id'] == params['id'].to_i
-  end
-
-  @todo = selected_todo
+  @todo = json['todos'].find { |todo| todo['id'] == params['id'].to_i }
   erb :edit
 end
 
 patch '/edit' do
   json = db_json
 
-  json['todos'].map do |todo|
-    if todo['id'] == params[:id].to_i
-      todo['title'] = params[:title]
-      todo['body'] = params[:body]
-    end
-  end
+  selected_todo = json['todos'].find { |todo| todo['id'] == params['id'].to_i }
+  selected_todo['title'] = params[:title]
+  selected_todo['body'] = params[:body]
 
   File.open('todos.json', 'w') do |file|
     JSON.dump(json, file)

@@ -20,7 +20,7 @@ get '/create' do
   erb :create
 end
 
-post '/create' do
+post '/todos' do
   json = db_json
 
   max_id = json['todos'].map do |todo|
@@ -41,7 +41,7 @@ post '/create' do
   redirect to('/todos'), 303
 end
 
-get '/detail/:id' do
+get '/todos/:id' do
   json = db_json
 
   selected_todo = json['todos'].find { |todo| todo['id'] == params['id'].to_i }
@@ -52,7 +52,7 @@ get '/detail/:id' do
   erb :detail
 end
 
-get '/edit/:id' do
+get '/todos/:id/edit' do
   json = db_json
 
   selected_todo = json['todos'].find { |todo| todo['id'] == params['id'].to_i }
@@ -63,7 +63,7 @@ get '/edit/:id' do
   erb :edit
 end
 
-patch '/edit' do
+patch '/todos/:id' do
   json = db_json
 
   selected_todo = json['todos'].find { |todo| todo['id'] == params['id'].to_i }
@@ -77,7 +77,7 @@ patch '/edit' do
   redirect to('/todos'), 303
 end
 
-delete '/delete' do
+delete '/todos/:id' do
   json = db_json
 
   json['todos'].delete_if { |todo| todo['id'] == params['id'].to_i }

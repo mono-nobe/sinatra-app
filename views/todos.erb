@@ -8,7 +8,7 @@
   <ul>
     <% @todos.each do |todo| %>
     <li>
-      <a href="/detail/<%= todo["id"] %>"><%= todo["title"] %></a>
+      <a href="/todos/<%= todo["id"] %>"><%= todo["title"] %></a>
     </li>
     <% end %>
   </ul>

@@ -104,7 +104,7 @@ end
 
 def db_json
   json_string = File.read('todos.json') do |file|
-    JSON.parse(file)
+    file
   end
 
   JSON.parse(json_string)

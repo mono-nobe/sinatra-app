@@ -1,29 +1,17 @@
-<!DOCTYPE html>
-<html lang="ja">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-  </head>
-  <body>
-    <h1>メモアプリ</h1>
+<h2><%= @todo["title"] %></h2>
 
-    <h2><%= @todo["title"] %></h2>
+<textarea readonly rows="5" cols="40"><%= @todo["body"] %></textarea>
 
-    <textarea readonly rows="5" cols="40"><%= @todo["body"] %></textarea>
+<div>
+  <button type="button">
+    <a href="/edit/<%= @todo["id"] %>"><font size="2">変更</font></a>
+  </button>
+</div>
 
-    <div>
-      <button type="button">
-        <a href="/edit/<%= @todo["id"] %>"><font size="2">変更</font></a>
-      </button>
-    </div>
-
-    <div>
-      <form method="post" action="/delete" >
-        <input type="hidden" name="_method" value="DELETE">
-        <input type="hidden" name="id" value="<%= @todo["id"] %>">
-        <input type="submit" value="削除">
-      </form>
-    </div>
-  </body>
-</html>
+<div>
+  <form method="post" action="/delete" >
+    <input type="hidden" name="_method" value="DELETE">
+    <input type="hidden" name="id" value="<%= @todo["id"] %>">
+    <input type="submit" value="削除">
+  </form>
+</div>

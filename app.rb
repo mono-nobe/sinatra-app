@@ -38,7 +38,7 @@ post '/todos' do
     JSON.dump(json, file)
   end
 
-  redirect to('/todos'), 303
+  redirect to('/todos')
 end
 
 get '/todos/:id' do
@@ -74,7 +74,7 @@ patch '/todos/:id' do
     JSON.dump(json, file)
   end
 
-  redirect to('/todos'), 303
+  redirect to('/todos')
 end
 
 delete '/todos/:id' do
@@ -86,7 +86,7 @@ delete '/todos/:id' do
     JSON.dump(json, file)
   end
 
-  redirect to('/todos'), 303
+  redirect to('/todos')
 end
 
 def escape_html(text)

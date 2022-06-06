@@ -16,7 +16,7 @@ get '/todos' do
   erb :todos
 end
 
-get '/todos/create' do
+get '/todos/creator' do
   erb :create
 end
 
@@ -52,7 +52,7 @@ get '/todos/:id' do
   erb :detail
 end
 
-get '/todos/:id/edit' do
+get '/todos/:id/editor' do
   json = db_json
 
   selected_todo = json['todos'].find { |todo| todo['id'] == params['id'].to_i }

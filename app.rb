@@ -94,9 +94,5 @@ def escape_html(text)
 end
 
 def db_json
-  json_string = File.read('todos.json') do |file|
-    file
-  end
-
-  JSON.parse(json_string)
+  JSON.parse(File.read('todos.json'))
 end

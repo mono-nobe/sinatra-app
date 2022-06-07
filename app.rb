@@ -55,26 +55,24 @@ get '/todos/:id' do
 end
 
 get '/todos/:id/editor' do
-  json = db_json
-
-  selected_todo = json['todos'].find { |todo| todo['id'] == params['id'].to_i }
+  connect = connect_db
+  selected_todo = select_record(connect, params['id'])
   selected_todo['title'] = escape_html(selected_todo['title'])
   selected_todo['body'] = escape_html(selected_todo['body'])
 
-  @todo = selected_todo
+  @todo = JSON.parse(selected_todo.to_json)
   erb :edit
 end
 
 patch '/todos/:id' do
-  json = db_json
+  connect = connect_db
 
-  selected_todo = json['todos'].find { |todo| todo['id'] == params['id'].to_i }
-  selected_todo['title'] = params[:title]
-  selected_todo['body'] = params[:body]
-
-  File.open('todos.json', 'w') do |file|
-    JSON.dump(json, file)
-  end
+  todo = {
+    'id' => params['id'],
+    'title' => params[:title],
+    'body' => params[:body]
+  }
+  update_record(connect, todo)
 
   redirect to('/todos')
 end
@@ -104,24 +102,35 @@ def connect_db
 end
 
 def select_all_record(connect)
-  todos = []
+  results = []
 
   connect.exec('SELECT * FROM todos;') do |records|
     records.each do |record|
-      todos.push(record)
+      results.push(record)
     end
   end
 
-  todos
+  results
 end
 
 def select_record(connect, id)
-  todo = {}
+  result = {}
   connect.exec('SELECT * FROM todos WHERE id = $1', [id]) do |records|
     records.each do |record|
-      todo = record
+      result = record
     end
   end
 
-  todo
+  result
+end
+
+def update_record(connect, todo)
+  connect.exec(
+    'UPDATE todos SET title = $1, body = $2 WHERE id = $3;',
+    [
+      todo['title'],
+      todo['body'],
+      todo['id']
+    ]
+  )
 end

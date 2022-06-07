@@ -1,18 +1,20 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'pg'
 require 'sinatra'
 require 'sinatra/reloader'
 
 get '/todos' do
-  json = db_json
+  connect = connect_db
+  todos = select_all_record(connect)
 
-  json['todos'].map do |todo|
+  todos.map do |todo|
     todo['title'] = escape_html(todo['title'])
     todo['body'] = escape_html(todo['body'])
   end
 
-  @todos = json['todos']
+  @todos = JSON.parse(todos.to_json)
   erb :todos
 end
 
@@ -95,4 +97,20 @@ end
 
 def db_json
   JSON.parse(File.read('todos.json'))
+end
+
+def connect_db
+  PG.connect(dbname: 'sinatra')
+end
+
+def select_all_record(connect)
+  todos = []
+
+  connect.exec('SELECT * FROM todos;') do |records|
+    records.each do |record|
+      todos.push(record)
+    end
+  end
+
+  todos
 end

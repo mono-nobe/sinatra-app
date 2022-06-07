@@ -23,22 +23,13 @@ get '/todos/creator' do
 end
 
 post '/todos' do
-  json = db_json
+  connect = connect_db
 
-  max_id = json['todos'].map do |todo|
-    todo['id'].to_i
-  end.max
-
-  new_todo = {
-    id: max_id.nil? ? 1 : max_id + 1,
-    title: params[:title],
-    body: params[:body]
+  todo = {
+    'title' => params[:title],
+    'body' => params[:body]
   }
-
-  json['todos'].push(new_todo)
-  File.open('todos.json', 'w') do |file|
-    JSON.dump(json, file)
-  end
+  create_record(connect, todo)
 
   redirect to('/todos')
 end
@@ -117,6 +108,16 @@ def select_record(connect, id)
   end
 
   result
+end
+
+def create_record(connect, todo)
+  connect.exec(
+    'INSERT INTO todos (title, body) VALUES ($1, $2);',
+    [
+      todo['title'],
+      todo['body']
+    ]
+  )
 end
 
 def update_record(connect, todo)

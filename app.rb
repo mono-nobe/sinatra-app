@@ -78,13 +78,8 @@ patch '/todos/:id' do
 end
 
 delete '/todos/:id' do
-  json = db_json
-
-  json['todos'].delete_if { |todo| todo['id'] == params['id'].to_i }
-
-  File.open('todos.json', 'w') do |file|
-    JSON.dump(json, file)
-  end
+  connect = connect_db
+  delete_record(connect, params['id'])
 
   redirect to('/todos')
 end
@@ -133,4 +128,8 @@ def update_record(connect, todo)
       todo['id']
     ]
   )
+end
+
+def delete_record(connect, id)
+  connect.exec('DELETE FROM todos WHERE id=$1;', [id])
 end

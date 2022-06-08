@@ -10,8 +10,8 @@ get '/todos' do
   todos = select_all_record(connect)
 
   todos.map do |todo|
-    todo['title'] = escape_html(todo['title'])
-    todo['body'] = escape_html(todo['body'])
+    todo['title'] = escape_html(todo['title']).force_encoding('UTF-8')
+    todo['body'] = escape_html(todo['body']).force_encoding('UTF-8')
   end
 
   @todos = JSON.parse(todos.to_json)
@@ -36,22 +36,22 @@ end
 
 get '/todos/:id' do
   connect = connect_db
-  selected_todo = select_record(connect, params['id'])
+  todo = select_record(connect, params['id'])
 
-  selected_todo['title'] = escape_html(selected_todo['title'])
-  selected_todo['body'] = escape_html(selected_todo['body'])
+  todo['title'] = escape_html(todo['title']).force_encoding('UTF-8')
+  todo['body'] = escape_html(todo['body']).force_encoding('UTF-8')
 
-  @todo = JSON.parse(selected_todo.to_json)
+  @todo = JSON.parse(todo.to_json)
   erb :detail
 end
 
 get '/todos/:id/editor' do
   connect = connect_db
-  selected_todo = select_record(connect, params['id'])
-  selected_todo['title'] = escape_html(selected_todo['title'])
-  selected_todo['body'] = escape_html(selected_todo['body'])
+  todo = select_record(connect, params['id'])
+  todo['title'] = escape_html(todo['title']).force_encoding('UTF-8')
+  todo['body'] = escape_html(todo['body']).force_encoding('UTF-8')
 
-  @todo = JSON.parse(selected_todo.to_json)
+  @todo = JSON.parse(todo.to_json)
   erb :edit
 end
 
@@ -101,7 +101,7 @@ end
 
 def select_record(connect, id)
   result = {}
-  connect.exec('SELECT * FROM todos WHERE id = $1', [id]) do |records|
+  connect.exec('SELECT * FROM todos WHERE id = $1;', [id]) do |records|
     records.each do |record|
       result = record
     end

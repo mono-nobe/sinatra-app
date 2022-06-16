@@ -6,8 +6,8 @@ require 'sinatra'
 require 'sinatra/reloader'
 
 get '/todos' do
-  connect = connect_db
-  todos = select_all_record(connect)
+  connection = connect_db
+  todos = select_all_records(connection)
 
   todos.map do |todo|
     todo['title'] = escape_html(todo['title']).force_encoding('UTF-8')
@@ -23,20 +23,20 @@ get '/todos/creator' do
 end
 
 post '/todos' do
-  connect = connect_db
+  connection = connect_db
 
   todo = {
     'title' => params[:title],
     'body' => params[:body]
   }
-  create_record(connect, todo)
+  create_record(connection, todo)
 
   redirect to('/todos')
 end
 
 get '/todos/:id' do
-  connect = connect_db
-  todo = select_record(connect, params['id'])
+  connection = connect_db
+  todo = select_record(connection, params['id'])
 
   todo['title'] = escape_html(todo['title']).force_encoding('UTF-8')
   todo['body'] = escape_html(todo['body']).force_encoding('UTF-8')
@@ -46,8 +46,8 @@ get '/todos/:id' do
 end
 
 get '/todos/:id/editor' do
-  connect = connect_db
-  todo = select_record(connect, params['id'])
+  connection = connect_db
+  todo = select_record(connection, params['id'])
   todo['title'] = escape_html(todo['title']).force_encoding('UTF-8')
   todo['body'] = escape_html(todo['body']).force_encoding('UTF-8')
 
@@ -56,21 +56,21 @@ get '/todos/:id/editor' do
 end
 
 patch '/todos/:id' do
-  connect = connect_db
+  connection = connect_db
 
   todo = {
     'id' => params['id'],
     'title' => params[:title],
     'body' => params[:body]
   }
-  update_record(connect, todo)
+  update_record(connection, todo)
 
   redirect to('/todos')
 end
 
 delete '/todos/:id' do
-  connect = connect_db
-  delete_record(connect, params['id'])
+  connection = connect_db
+  delete_record(connection, params['id'])
 
   redirect to('/todos')
 end
@@ -87,31 +87,28 @@ def connect_db
   PG.connect(dbname: 'sinatra')
 end
 
-def select_all_record(connect)
+def select_all_records(connection)
   results = []
 
-  connect.exec('SELECT * FROM todos;') do |records|
-    records.each do |record|
-      results.push(record)
-    end
+  connection.exec('SELECT * FROM todos;') do |records|
+    results = records.to_a
   end
 
   results
 end
 
-def select_record(connect, id)
+def select_record(connection, id)
   result = {}
-  connect.exec('SELECT * FROM todos WHERE id = $1;', [id]) do |records|
-    records.each do |record|
-      result = record
-    end
+
+  connection.exec('SELECT * FROM todos WHERE id = $1;', [id]) do |records|
+    result = records.to_a[0]
   end
 
   result
 end
 
-def create_record(connect, todo)
-  connect.exec(
+def create_record(connection, todo)
+  connection.exec(
     'INSERT INTO todos (title, body) VALUES ($1, $2);',
     [
       todo['title'],
@@ -120,8 +117,8 @@ def create_record(connect, todo)
   )
 end
 
-def update_record(connect, todo)
-  connect.exec(
+def update_record(connection, todo)
+  connection.exec(
     'UPDATE todos SET title = $1, body = $2 WHERE id = $3;',
     [
       todo['title'],
@@ -131,6 +128,6 @@ def update_record(connect, todo)
   )
 end
 
-def delete_record(connect, id)
-  connect.exec('DELETE FROM todos WHERE id=$1;', [id])
+def delete_record(connection, id)
+  connection.exec('DELETE FROM todos WHERE id=$1;', [id])
 end

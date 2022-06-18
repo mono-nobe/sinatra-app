@@ -14,7 +14,7 @@ get '/todos' do
     todo['body'] = escape_html(todo['body']).force_encoding('UTF-8')
   end
 
-  @todos = JSON.parse(todos.to_json)
+  @todos = todos
   erb :todos
 end
 
@@ -41,7 +41,7 @@ get '/todos/:id' do
   todo['title'] = escape_html(todo['title']).force_encoding('UTF-8')
   todo['body'] = escape_html(todo['body']).force_encoding('UTF-8')
 
-  @todo = JSON.parse(todo.to_json)
+  @todo = todo
   erb :detail
 end
 
@@ -51,7 +51,7 @@ get '/todos/:id/editor' do
   todo['title'] = escape_html(todo['title']).force_encoding('UTF-8')
   todo['body'] = escape_html(todo['body']).force_encoding('UTF-8')
 
-  @todo = JSON.parse(todo.to_json)
+  @todo = todo
   erb :edit
 end
 
@@ -77,10 +77,6 @@ end
 
 def escape_html(text)
   Rack::Utils.escape_html(text)
-end
-
-def db_json
-  JSON.parse(File.read('todos.json'))
 end
 
 def connect_db

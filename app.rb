@@ -1,18 +1,20 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'pg'
 require 'sinatra'
 require 'sinatra/reloader'
 
 get '/todos' do
-  json = db_json
+  connection = connect_db
+  todos = select_all_records(connection)
 
-  json['todos'].map do |todo|
-    todo['title'] = escape_html(todo['title'])
-    todo['body'] = escape_html(todo['body'])
+  todos.map do |todo|
+    todo['title'] = escape_html(todo['title']).force_encoding('UTF-8')
+    todo['body'] = escape_html(todo['body']).force_encoding('UTF-8')
   end
 
-  @todos = json['todos']
+  @todos = todos
   erb :todos
 end
 
@@ -21,70 +23,54 @@ get '/todos/creator' do
 end
 
 post '/todos' do
-  json = db_json
+  connection = connect_db
 
-  max_id = json['todos'].map do |todo|
-    todo['id'].to_i
-  end.max
-
-  new_todo = {
-    id: max_id.nil? ? 1 : max_id + 1,
-    title: params[:title],
-    body: params[:body]
+  todo = {
+    'title' => params[:title],
+    'body' => params[:body]
   }
-
-  json['todos'].push(new_todo)
-  File.open('todos.json', 'w') do |file|
-    JSON.dump(json, file)
-  end
+  create_record(connection, todo)
 
   redirect to('/todos')
 end
 
 get '/todos/:id' do
-  json = db_json
+  connection = connect_db
+  todo = select_record(connection, params['id'])
 
-  selected_todo = json['todos'].find { |todo| todo['id'] == params['id'].to_i }
-  selected_todo['title'] = escape_html(selected_todo['title'])
-  selected_todo['body'] = escape_html(selected_todo['body'])
+  todo['title'] = escape_html(todo['title']).force_encoding('UTF-8')
+  todo['body'] = escape_html(todo['body']).force_encoding('UTF-8')
 
-  @todo = selected_todo
+  @todo = todo
   erb :detail
 end
 
 get '/todos/:id/editor' do
-  json = db_json
+  connection = connect_db
+  todo = select_record(connection, params['id'])
+  todo['title'] = escape_html(todo['title']).force_encoding('UTF-8')
+  todo['body'] = escape_html(todo['body']).force_encoding('UTF-8')
 
-  selected_todo = json['todos'].find { |todo| todo['id'] == params['id'].to_i }
-  selected_todo['title'] = escape_html(selected_todo['title'])
-  selected_todo['body'] = escape_html(selected_todo['body'])
-
-  @todo = selected_todo
+  @todo = todo
   erb :edit
 end
 
 patch '/todos/:id' do
-  json = db_json
+  connection = connect_db
 
-  selected_todo = json['todos'].find { |todo| todo['id'] == params['id'].to_i }
-  selected_todo['title'] = params[:title]
-  selected_todo['body'] = params[:body]
-
-  File.open('todos.json', 'w') do |file|
-    JSON.dump(json, file)
-  end
+  todo = {
+    'id' => params['id'],
+    'title' => params[:title],
+    'body' => params[:body]
+  }
+  update_record(connection, todo)
 
   redirect to('/todos')
 end
 
 delete '/todos/:id' do
-  json = db_json
-
-  json['todos'].delete_if { |todo| todo['id'] == params['id'].to_i }
-
-  File.open('todos.json', 'w') do |file|
-    JSON.dump(json, file)
-  end
+  connection = connect_db
+  delete_record(connection, params['id'])
 
   redirect to('/todos')
 end
@@ -93,6 +79,51 @@ def escape_html(text)
   Rack::Utils.escape_html(text)
 end
 
-def db_json
-  JSON.parse(File.read('todos.json'))
+def connect_db
+  PG.connect(dbname: 'sinatra')
+end
+
+def select_all_records(connection)
+  results = []
+
+  connection.exec('SELECT * FROM todos;') do |records|
+    results = records.to_a
+  end
+
+  results
+end
+
+def select_record(connection, id)
+  result = {}
+
+  connection.exec('SELECT * FROM todos WHERE id = $1;', [id]) do |records|
+    result = records.to_a[0]
+  end
+
+  result
+end
+
+def create_record(connection, todo)
+  connection.exec(
+    'INSERT INTO todos (title, body) VALUES ($1, $2);',
+    [
+      todo['title'],
+      todo['body']
+    ]
+  )
+end
+
+def update_record(connection, todo)
+  connection.exec(
+    'UPDATE todos SET title = $1, body = $2 WHERE id = $3;',
+    [
+      todo['title'],
+      todo['body'],
+      todo['id']
+    ]
+  )
+end
+
+def delete_record(connection, id)
+  connection.exec('DELETE FROM todos WHERE id=$1;', [id])
 end
